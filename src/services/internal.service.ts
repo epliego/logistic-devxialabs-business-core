@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Res } from '@nestjs/common';
-import { In, Not, Repository, ILike, LessThan } from 'typeorm';
+import { FindOptionsWhere, Repository, ILike, LessThan } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import express from 'express';
 import { AppService } from '../app.service';
@@ -253,6 +253,142 @@ export class InternalService {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: 500,
         message: 'Error in service Create Shipment',
+        errors: [error_message],
+      });
+    }
+  }
+
+  /**
+   * Function Shipments List
+   * @param status_id
+   * @param offset
+   * @param search
+   * @param limit
+   * @param order
+   * @param response
+   */
+  async shipmentsListService(
+    status_id: string,
+    offset: string,
+    search: string,
+    limit: string,
+    order: string,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    try {
+      let where:
+        FindOptionsWhere<ShipmentEntity> | FindOptionsWhere<ShipmentEntity>[] =
+        {};
+      if (status_id.trim() !== '') {
+        where = {
+          status: {
+            id: Number(status_id.trim()),
+          },
+        };
+      }
+
+      if (search) {
+        if (status_id.trim() !== '') {
+          where = [
+            {
+              guide_code: ILike(`%${search}%`),
+              status: {
+                id: Number(status_id.trim()),
+              },
+            },
+            {
+              provenance_direction: ILike(`%${search}%`),
+              status: {
+                id: Number(status_id.trim()),
+              },
+            },
+            {
+              destination_direction: ILike(`%${search}%`),
+              status: {
+                id: Number(status_id.trim()),
+              },
+            },
+            {
+              recipient_name: ILike(`%${search}%`),
+              status: {
+                id: Number(status_id.trim()),
+              },
+            },
+          ];
+        } else {
+          where = [
+            {
+              guide_code: ILike(`%${search}%`),
+            },
+            {
+              provenance_direction: ILike(`%${search}%`),
+            },
+            {
+              destination_direction: ILike(`%${search}%`),
+            },
+            {
+              recipient_name: ILike(`%${search}%`),
+            },
+          ];
+        }
+      }
+
+      const json_shipments = await this.shipmentRepository.find({
+        relations: { status: true },
+        where: where,
+        skip: Number(offset),
+        take: Number(limit),
+        order: {
+          guide_code: order.toUpperCase() as 'ASC' | 'DESC' | undefined,
+        },
+      });
+
+      const array_shipments: any[] = [];
+      for (const shipment of json_shipments) {
+        const status = await shipment.status;
+
+        const insert_by_internal = await shipment.insert_by_internal;
+
+        array_shipments.push({
+          shipment_id: shipment.id,
+          guide_code: shipment.guide_code,
+          provenance_direction: shipment.provenance_direction,
+          destination_direction: shipment.destination_direction,
+          recipient_phone: shipment.recipient_phone,
+          weight_kg: Number(shipment.weight_kg),
+          status: status.name,
+          insert_date: DateTime.fromISO(
+            new Date(shipment.insert_date).toISOString(),
+          )
+            .setLocale('es')
+            .toFormat('dd/MM/yyyy t'),
+          insert_by_internal: insert_by_internal.name,
+        });
+      }
+
+      const total_shipments = await this.shipmentRepository.count({
+        where: where,
+      });
+
+      response.status(HttpStatus.OK).json({
+        statusCode: 200,
+        message: 'Shipments List successfully',
+        data: [
+          {
+            list_shipments: array_shipments,
+            total_shipments: total_shipments,
+          },
+        ],
+      });
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service Shipments List',
         errors: [error_message],
       });
     }

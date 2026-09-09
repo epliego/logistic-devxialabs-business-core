@@ -8,6 +8,8 @@ import {
   ValidationPipe,
   Headers,
   UseGuards,
+  Get,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -16,6 +18,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -25,6 +28,7 @@ import { ResponseEmptyDto } from '../dto/response/response-empty.dto';
 import { RequestCreateInternalUserDto } from '../dto/request/request-create-internal-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment.dto';
+import { ResponseShipmentsListDto } from '../dto/response/response-shipments-list.dto';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -111,6 +115,51 @@ export class InternalController {
     return this.internalService.createShipmentService(
       auth,
       parameters,
+      response,
+    );
+  }
+
+  /**
+   * API Shipments List
+   * @param status_id
+   * @param offset
+   * @param search
+   * @param limit
+   * @param order
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API Shipments List',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '<b>Error Message:</b> Error in service Shipments List',
+  })
+  @ApiOkResponse({
+    description: 'Shipments List successfully',
+    type: ResponseShipmentsListDto,
+  })
+  @ApiQuery({ name: 'status_id', required: false, type: String })
+  @ApiQuery({ name: 'offset', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'order', required: false, type: String })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('shipments')
+  @UsePipes(ValidationPipe)
+  async shipmentsList(
+    @Query('status_id') status_id: string = '',
+    @Query('offset') offset: string,
+    @Query('search') search: string,
+    @Query('limit') limit: string,
+    @Query('order') order: string,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    return this.internalService.shipmentsListService(
+      status_id,
+      offset,
+      search,
+      limit,
+      order,
       response,
     );
   }
