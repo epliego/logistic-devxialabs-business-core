@@ -48,8 +48,9 @@ export class ShipmentEntity {
     type: 'character varying',
     length: 255,
     comment: 'Recipient phone',
+    nullable: true,
   })
-  recipient_phone: string;
+  recipient_phone: string | null;
 
   @Column({
     type: 'numeric',
