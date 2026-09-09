@@ -16,6 +16,8 @@ import { ValuesCatalogEntity } from './entities/values-catalog.entity';
 import { ShipmentTrackingHistoryEntity } from './entities/shipment-tracking-history.entity';
 import { InternalUserController } from './controllers/internal-user.controller';
 import { InternalUserService } from './services/internal-user.service';
+import { InternalService } from './services/internal.service';
+import { InternalController } from './controllers/internal.controller';
 import { config } from 'dotenv';
 
 config();
@@ -40,11 +42,12 @@ config();
     }),
     PassportModule,
   ],
-  controllers: [AppController, InternalUserController],
+  controllers: [AppController, InternalUserController, InternalController],
   providers: [
     AppService,
     JwtInternalAccessTokenStrategy,
     InternalUserService,
+    InternalService,
   ],
 })
 export class AppModule {

@@ -32,7 +32,7 @@ export class InternalUserController {
    */
   @ApiOperation({
     summary:
-      'Authenticate user and obtain access token to DevxIA Labs Logistic APIs',
+      'API Authenticate user and obtain access token to DevxIA Labs Logistic APIs',
   })
   @ApiBadRequestResponse({
     description:
