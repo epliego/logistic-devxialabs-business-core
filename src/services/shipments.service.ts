@@ -24,8 +24,15 @@ export class ShipmentsService {
   ): Promise<any> {
     try {
       const json_shipments = await this.shipmentRepository.find({
+        relations: { status: true },
         where: {
           guide_code: In(parameters.shipment_ids),
+          status: {
+            name: 'EN ALMACÉN',
+          },
+        },
+        order: {
+          weight_kg: 'DESC',
         },
       });
 
@@ -81,7 +88,10 @@ export class ShipmentsService {
         total_weight_kg_used = total_weight_kg_used + vehicle.total_weight_kg;
       }
 
-      if (total_weight_kg <= parameters.vehicle_capacity) {
+      if (
+        total_weight_kg <= parameters.vehicle_capacity &&
+        json_shipments.length > 0
+      ) {
         array_vehicles.push({
           vehicle_number: vehicle_number + 1,
           shipments: array_shipments,
