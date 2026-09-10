@@ -18,6 +18,8 @@ import { InternalUserController } from './controllers/internal-user.controller';
 import { InternalUserService } from './services/internal-user.service';
 import { InternalService } from './services/internal.service';
 import { InternalController } from './controllers/internal.controller';
+import { ValuesCatalogController } from './controllers/values-catalog.controller';
+import { ValuesCatalogService } from './services/values-catalog.service';
 import { config } from 'dotenv';
 
 config();
@@ -42,12 +44,18 @@ config();
     }),
     PassportModule,
   ],
-  controllers: [AppController, InternalUserController, InternalController],
+  controllers: [
+    AppController,
+    InternalUserController,
+    InternalController,
+    ValuesCatalogController,
+  ],
   providers: [
     AppService,
     JwtInternalAccessTokenStrategy,
     InternalUserService,
     InternalService,
+    ValuesCatalogService,
   ],
 })
 export class AppModule {
