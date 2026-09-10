@@ -3,7 +3,6 @@ import {
   Controller,
   Post,
   Res,
-  HttpStatus,
   UsePipes,
   ValidationPipe,
   Headers,
@@ -34,7 +33,7 @@ import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment
 import { ResponseShipmentsListDto } from '../dto/response/response-shipments-list.dto';
 import { ResponseViewShipmentDto } from '../dto/response/response-view-shipment.dto';
 import { RequestUpdateShipmentStatusDto } from '../dto/request/request-update-shipment-status.dto';
-import { ResponseShipmentsTrackingHistoryDto } from '../dto/response/response-shipments-tracking-history.dto';
+import { ResponseShipmentTrackingHistoryDto } from '../dto/response/response-shipment-tracking-history.dto';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -216,7 +215,7 @@ export class InternalController {
   })
   @ApiOkResponse({
     description: 'Shipment Tracking History successfully',
-    type: ResponseShipmentsTrackingHistoryDto,
+    type: ResponseShipmentTrackingHistoryDto,
   })
   @ApiQuery({ name: 'offset', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })

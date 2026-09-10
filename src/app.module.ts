@@ -20,6 +20,8 @@ import { InternalService } from './services/internal.service';
 import { InternalController } from './controllers/internal.controller';
 import { ValuesCatalogController } from './controllers/values-catalog.controller';
 import { ValuesCatalogService } from './services/values-catalog.service';
+import { ExternalUserController } from './controllers/external-user.controller';
+import { ExternalUserService } from './services/external-user.service';
 import { config } from 'dotenv';
 
 config();
@@ -49,6 +51,7 @@ config();
     InternalUserController,
     InternalController,
     ValuesCatalogController,
+    ExternalUserController,
   ],
   providers: [
     AppService,
@@ -56,6 +59,7 @@ config();
     InternalUserService,
     InternalService,
     ValuesCatalogService,
+    ExternalUserService,
   ],
 })
 export class AppModule {

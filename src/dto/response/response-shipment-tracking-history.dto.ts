@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ResponseShipmentsTrackingHistoryDto {
+export class ResponseShipmentTrackingHistoryDto {
   @IsNotEmpty()
   @IsArray()
   @ApiProperty({

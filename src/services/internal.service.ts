@@ -529,9 +529,7 @@ export class InternalService {
           skip: Number(offset),
           take: Number(limit),
           order: {
-            shipment: {
-              guide_code: order.toUpperCase() as 'ASC' | 'DESC' | undefined,
-            },
+            insert_date: order.toUpperCase() as 'ASC' | 'DESC' | undefined,
           },
         });
 
