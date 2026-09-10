@@ -21,7 +21,7 @@ import { ResponseShipmentStatusTrackingHistoryDto } from '../dto/response/respon
 @ApiBearerAuth()
 @Controller('v1/external-user')
 export class ExternalUserController {
-  constructor(private readonly externaluserService: ExternalUserService) {}
+  constructor(private readonly externalUserService: ExternalUserService) {}
 
   /**
    * API Shipment Tracking History
@@ -56,7 +56,7 @@ export class ExternalUserController {
     @Query('order') order: string,
     @Res() response: express.Response,
   ): Promise<any> {
-    return this.externaluserService.shipmentTrackingHistoryService(
+    return this.externalUserService.shipmentTrackingHistoryService(
       tracking_code,
       offset,
       search,
