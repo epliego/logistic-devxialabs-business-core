@@ -8,11 +8,12 @@ import { DateTime } from 'luxon'; // Consultado (10-2022) en: https://moment.git
 import { InternalUserEntity } from '../entities/internal-user.entity';
 import { InternalUserProfileEntity } from '../entities/internal-user-profile.entity';
 import { InternalUserByProfileEntity } from '../entities/internal-user-by-profile.entity';
-import { RequestCreateInternalUserDto } from '../dto/request/request-create-internal-user.dto';
-import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment.dto';
 import { ShipmentEntity } from '../entities/shipment.entity';
 import { ValuesCatalogEntity } from '../entities/values-catalog.entity';
 import { ShipmentTrackingHistoryEntity } from '../entities/shipment-tracking-history.entity';
+import { RequestCreateInternalUserDto } from '../dto/request/request-create-internal-user.dto';
+import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment.dto';
+import { RequestUpdateShipmentStatusDto } from '../dto/request/request-update-shipment-status.dto';
 
 @Injectable()
 export class InternalService {
@@ -182,12 +183,6 @@ export class InternalService {
           },
         });
 
-        const json_internal_user = await this.internalUserRepository.findOne({
-          where: {
-            id: json_auth_user.user_id,
-          },
-        });
-
         const shipment_created = await this.shipmentRepository
           .createQueryBuilder()
           .insert()
@@ -200,7 +195,7 @@ export class InternalService {
             recipient_phone: parameters.recipient_phone || null,
             weight_kg: parameters.weight_kg,
             status: { id: json_value_catalog!.id } as any,
-            insert_by_internal: { id: json_internal_user!.id } as any,
+            insert_by_internal: { id: json_auth_user.user_id } as any,
           })
           .execute();
 
@@ -233,7 +228,7 @@ export class InternalService {
           .values({
             shipment: { id: shipment_id_created } as any,
             status: { id: json_value_catalog!.id } as any,
-            insert_by_internal: { id: json_internal_user!.id } as any,
+            insert_by_internal: { id: json_auth_user.user_id } as any,
           })
           .execute();
 
@@ -590,6 +585,86 @@ export class InternalService {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: 500,
         message: 'Error in service Shipments List',
+        errors: [error_message],
+      });
+    }
+  }
+
+  /**
+   * Function Update Shipment Status
+   * @param auth
+   * @param shipment_id
+   * @param parameters
+   * @param response
+   */
+  async updateShipmentStatusService(
+    auth: string,
+    shipment_id: number,
+    parameters: RequestUpdateShipmentStatusDto,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    try {
+      const array_errors: any[] = [];
+
+      const json_shipment = await this.shipmentRepository.findOne({
+        where: {
+          id: shipment_id,
+        },
+      });
+
+      if (!json_shipment) {
+        array_errors.push('ID del Envío no fue encontrado');
+      }
+
+      if (array_errors.length > 0) {
+        response.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: 400,
+          message: 'Bad request',
+          errors: array_errors,
+        });
+      } else {
+        const json_auth_user = this.appService.jsonAuthUser(auth);
+
+        const json_value_catalog = await this.valuesCatalogRepository.findOne({
+          where: {
+            id: parameters.status_id,
+          },
+        });
+
+        json_shipment!.status = { id: json_value_catalog!.id } as any;
+        json_shipment!.update_date = new Date();
+        json_shipment!.update_by_internal = {
+          id: json_auth_user.user_id,
+        } as any;
+
+        await this.shipmentRepository.save(json_shipment!);
+
+        await this.shipmentTrackingHistoryRepository
+          .createQueryBuilder()
+          .insert()
+          .into(ShipmentTrackingHistoryEntity)
+          .values({
+            shipment: { id: json_shipment!.id } as any,
+            status: { id: json_value_catalog!.id } as any,
+            insert_by_internal: { id: json_auth_user.user_id } as any,
+          })
+          .execute();
+
+        response.status(HttpStatus.OK).json({
+          statusCode: 200,
+          message: 'Shipment status updated successfully',
+          data: [],
+        });
+      }
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service Update Shipment Status',
         errors: [error_message],
       });
     }

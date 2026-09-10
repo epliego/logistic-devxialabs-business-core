@@ -11,6 +11,7 @@ import {
   Get,
   Query,
   Param,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -31,6 +32,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment.dto';
 import { ResponseShipmentsListDto } from '../dto/response/response-shipments-list.dto';
 import { ResponseViewShipmentDto } from '../dto/response/response-view-shipment.dto';
+import { RequestUpdateShipmentStatusDto } from '../dto/request/request-update-shipment-status.dto';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -220,7 +222,6 @@ export class InternalController {
   @ApiQuery({ name: 'order', required: false, type: String })
   @UseGuards(AuthGuard('jwt'))
   @Get('shipment-tracking-history/:shipment_id')
-  @UsePipes(ValidationPipe)
   async shipmentTrackingHistory(
     @Param('shipment_id') shipment_id: number,
     @Query('offset') offset: string,
@@ -235,6 +236,48 @@ export class InternalController {
       search,
       limit,
       order,
+      response,
+    );
+  }
+
+  /**
+   * API Update Shipment Status
+   * @param auth
+   * @param id
+   * @param parameters
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API Update Shipment Status',
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<b>Bad Request:</b><br/>' +
+      '1.- status_id must be a number conforming to the specified constraints<br/>' +
+      '2.- Shipment ID was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description:
+      '<b>Error Message:</b> Error in service Update Shipment Status',
+  })
+  @ApiOkResponse({
+    description: 'Shipment status updated successfully',
+    type: ResponseEmptyDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('shipments/:id/status')
+  @UsePipes(ValidationPipe)
+  async updateShipmentStatus(
+    @Headers('Authorization') auth: string, // Consulted (09-2023) in: https://stackoverflow.com/questions/54081720/how-to-use-nest-jss-headers-properly
+    @Param('id') id: number,
+    @Body() parameters: RequestUpdateShipmentStatusDto,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    return this.internalService.updateShipmentStatusService(
+      auth,
+      id,
+      parameters,
       response,
     );
   }
