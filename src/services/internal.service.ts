@@ -553,7 +553,7 @@ export class InternalService {
           weight_kg: Number(shipment.weight_kg),
           status: status.name,
           insert_date: DateTime.fromISO(
-            new Date(shipment.insert_date).toISOString(),
+            new Date(shipment_tracking_history.insert_date).toISOString(),
           )
             .setLocale('es')
             .toFormat('dd/MM/yyyy t'),
@@ -665,6 +665,99 @@ export class InternalService {
       response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: 500,
         message: 'Error in service Update Shipment Status',
+        errors: [error_message],
+      });
+    }
+  }
+
+  /**
+   * Function Cancel Shipment
+   * @param auth
+   * @param shipment_id
+   * @param response
+   */
+  async cancelShipmentService(
+    auth: string,
+    shipment_id: number,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    try {
+      const array_errors: any[] = [];
+
+      const json_shipment = await this.shipmentRepository.findOne({
+        where: {
+          id: shipment_id,
+        },
+      });
+
+      if (!json_shipment) {
+        array_errors.push('ID del Envío no fue encontrado');
+      }
+
+      const json_value_catalog_delivered =
+        await this.valuesCatalogRepository.findOne({
+          where: {
+            name: 'ENTREGADO',
+          },
+        });
+
+      const status = await json_shipment!.status;
+      if (status.name === json_value_catalog_delivered!.name) {
+        array_errors.push(
+          'No se puede cancelar un envío porque ya ha sido entregado',
+        );
+      }
+
+      if (array_errors.length > 0) {
+        response.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: 400,
+          message: 'Bad request',
+          errors: array_errors,
+        });
+      } else {
+        const json_auth_user = this.appService.jsonAuthUser(auth);
+
+        const json_value_catalog_cancelled =
+          await this.valuesCatalogRepository.findOne({
+            where: {
+              name: 'CANCELADO',
+            },
+          });
+
+        json_shipment!.status = { id: json_value_catalog_cancelled!.id } as any;
+        json_shipment!.update_date = new Date();
+        json_shipment!.update_by_internal = {
+          id: json_auth_user.user_id,
+        } as any;
+
+        await this.shipmentRepository.save(json_shipment!);
+
+        await this.shipmentTrackingHistoryRepository
+          .createQueryBuilder()
+          .insert()
+          .into(ShipmentTrackingHistoryEntity)
+          .values({
+            shipment: { id: json_shipment!.id } as any,
+            status: { id: json_value_catalog_cancelled!.id } as any,
+            insert_by_internal: { id: json_auth_user.user_id } as any,
+          })
+          .execute();
+
+        response.status(HttpStatus.OK).json({
+          statusCode: 200,
+          message: 'Shipment cancelled successfully',
+          data: [],
+        });
+      }
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service Cancel Shipment',
         errors: [error_message],
       });
     }

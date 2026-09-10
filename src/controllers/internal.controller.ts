@@ -12,6 +12,7 @@ import {
   Query,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -33,6 +34,7 @@ import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment
 import { ResponseShipmentsListDto } from '../dto/response/response-shipments-list.dto';
 import { ResponseViewShipmentDto } from '../dto/response/response-view-shipment.dto';
 import { RequestUpdateShipmentStatusDto } from '../dto/request/request-update-shipment-status.dto';
+import { ResponseShipmentsTrackingHistoryDto } from '../dto/response/response-shipments-tracking-history.dto';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -214,7 +216,7 @@ export class InternalController {
   })
   @ApiOkResponse({
     description: 'Shipment Tracking History successfully',
-    type: ResponseShipmentsListDto,
+    type: ResponseShipmentsTrackingHistoryDto,
   })
   @ApiQuery({ name: 'offset', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -280,5 +282,39 @@ export class InternalController {
       parameters,
       response,
     );
+  }
+
+  /**
+   * API Cancel Shipment
+   * @param auth
+   * @param id
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API Cancel Shipment',
+  })
+  @ApiBadRequestResponse({
+    description:
+      '<b>Bad Request:</b><br/>' +
+      '1.- Shipment ID was not found<br/>' +
+      '2.- Shipment cannot be cancelled because it has already delivered',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '<b>Error Message:</b> Error in service Cancel Shipment',
+  })
+  @ApiOkResponse({
+    description: 'Shipment cancelled successfully',
+    type: ResponseEmptyDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('shipments/:id')
+  @UsePipes(ValidationPipe)
+  async cancelShipment(
+    @Headers('Authorization') auth: string, // Consulted (09-2023) in: https://stackoverflow.com/questions/54081720/how-to-use-nest-jss-headers-properly
+    @Param('id') id: number,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    return this.internalService.cancelShipmentService(auth, id, response);
   }
 }
