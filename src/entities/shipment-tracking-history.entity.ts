@@ -19,11 +19,11 @@ export class ShipmentTrackingHistoryEntity {
 
   @OneToOne(() => ShipmentEntity)
   @JoinColumn({ name: 'shipment_id', referencedColumnName: 'id' })
-  shipment: number;
+  shipment: Promise<ShipmentEntity>;
 
   @OneToOne(() => ValuesCatalogEntity)
   @JoinColumn({ name: 'status_id', referencedColumnName: 'id' })
-  status: number;
+  status: Promise<ValuesCatalogEntity>;
 
   @Column({
     type: 'int',
@@ -41,7 +41,7 @@ export class ShipmentTrackingHistoryEntity {
 
   @OneToOne(() => InternalUserEntity)
   @JoinColumn({ name: 'insert_by_internal', referencedColumnName: 'id' })
-  insert_by_internal: number;
+  insert_by_internal: Promise<InternalUserEntity>;
 
   @Column({
     type: 'timestamp with time zone',
@@ -52,5 +52,5 @@ export class ShipmentTrackingHistoryEntity {
 
   @OneToOne(() => InternalUserEntity)
   @JoinColumn({ name: 'insert_by_internal', referencedColumnName: 'id' })
-  update_by_internal: number;
+  update_by_internal: Promise<InternalUserEntity>;
 }

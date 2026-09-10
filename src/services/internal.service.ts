@@ -393,4 +393,205 @@ export class InternalService {
       });
     }
   }
+
+  /**
+   * Function View Shipment
+   * @param id
+   * @param response
+   */
+  async viewShipmentService(
+    id: number,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    try {
+      const array_errors: any[] = [];
+
+      const json_shipment = await this.shipmentRepository.findOne({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!json_shipment) {
+        array_errors.push('ID del Envío no fue encontrado');
+      }
+
+      if (array_errors.length > 0) {
+        response.status(HttpStatus.BAD_REQUEST).json({
+          statusCode: 400,
+          message: 'Bad Request',
+          errors: array_errors,
+        });
+      } else {
+        const status = await json_shipment!.status;
+
+        const insert_by_internal = await json_shipment!.insert_by_internal;
+
+        response.status(HttpStatus.OK).json({
+          statusCode: 200,
+          message: 'View Shipment successfully',
+          data: [
+            {
+              shipment_id: json_shipment!.id,
+              guide_code: json_shipment!.guide_code,
+              provenance_direction: json_shipment!.provenance_direction,
+              destination_direction: json_shipment!.destination_direction,
+              recipient_name: json_shipment!.recipient_name,
+              recipient_phone: json_shipment!.recipient_phone,
+              weight_kg: json_shipment!.weight_kg,
+              status: status.name,
+              insert_date: DateTime.fromISO(
+                new Date(json_shipment!.insert_date).toISOString(),
+              )
+                .setLocale('es')
+                .toFormat('dd/MM/yyyy t'),
+              insert_by_internal: insert_by_internal.name,
+            },
+          ],
+        });
+      }
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service View Shipment',
+        errors: [error_message],
+      });
+    }
+  }
+
+  /**
+   * Function Shipment Tracking History
+   * @param shipment_id
+   * @param offset
+   * @param search
+   * @param limit
+   * @param order
+   * @param response
+   */
+  async shipmentTrackingHistoryService(
+    shipment_id: number,
+    offset: string,
+    search: string,
+    limit: string,
+    order: string,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    try {
+      let where:
+        | FindOptionsWhere<ShipmentTrackingHistoryEntity>
+        | FindOptionsWhere<ShipmentTrackingHistoryEntity>[] = {
+        shipment: {
+          id: shipment_id,
+        },
+      };
+
+      if (search) {
+        where = [
+          {
+            shipment: {
+              id: shipment_id,
+              guide_code: ILike(`%${search}%`),
+            },
+          },
+          {
+            shipment: {
+              id: shipment_id,
+              provenance_direction: ILike(`%${search}%`),
+            },
+          },
+          {
+            shipment: {
+              id: shipment_id,
+              destination_direction: ILike(`%${search}%`),
+            },
+          },
+          {
+            shipment: {
+              id: shipment_id,
+              recipient_name: ILike(`%${search}%`),
+            },
+          },
+          {
+            shipment: {
+              id: shipment_id,
+            },
+            status: {
+              name: ILike(`%${search}%`),
+            },
+          },
+        ];
+      }
+
+      const json_shipment_tracking_history =
+        await this.shipmentTrackingHistoryRepository.find({
+          relations: { shipment: true, status: true },
+          where: where,
+          skip: Number(offset),
+          take: Number(limit),
+          order: {
+            shipment: {
+              guide_code: order.toUpperCase() as 'ASC' | 'DESC' | undefined,
+            },
+          },
+        });
+
+      const array_shipment_tracking_history: any[] = [];
+      for (const shipment_tracking_history of json_shipment_tracking_history) {
+        const shipment = await shipment_tracking_history.shipment;
+
+        const status = await shipment_tracking_history.status;
+
+        const insert_by_internal =
+          await shipment_tracking_history.insert_by_internal;
+
+        array_shipment_tracking_history.push({
+          shipment_id: shipment.id,
+          guide_code: shipment.guide_code,
+          provenance_direction: shipment.provenance_direction,
+          destination_direction: shipment.destination_direction,
+          recipient_phone: shipment.recipient_phone,
+          weight_kg: Number(shipment.weight_kg),
+          status: status.name,
+          insert_date: DateTime.fromISO(
+            new Date(shipment.insert_date).toISOString(),
+          )
+            .setLocale('es')
+            .toFormat('dd/MM/yyyy t'),
+          insert_by_internal: insert_by_internal.name,
+        });
+      }
+
+      const total_shipment_tracking_history =
+        await this.shipmentTrackingHistoryRepository.count({
+          where: where,
+        });
+
+      response.status(HttpStatus.OK).json({
+        statusCode: 200,
+        message: 'Shipment Tracking History successfully',
+        data: [
+          {
+            list_shipment_tracking_history: array_shipment_tracking_history,
+            total_shipment_tracking_history: total_shipment_tracking_history,
+          },
+        ],
+      });
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service Shipments List',
+        errors: [error_message],
+      });
+    }
+  }
 }

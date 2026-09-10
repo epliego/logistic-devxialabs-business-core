@@ -10,6 +10,7 @@ import {
   UseGuards,
   Get,
   Query,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -29,6 +30,7 @@ import { RequestCreateInternalUserDto } from '../dto/request/request-create-inte
 import { AuthGuard } from '@nestjs/passport';
 import { RequestCreateShipmentDto } from '../dto/request/request-create-shipment.dto';
 import { ResponseShipmentsListDto } from '../dto/response/response-shipments-list.dto';
+import { ResponseViewShipmentDto } from '../dto/response/response-view-shipment.dto';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -156,6 +158,79 @@ export class InternalController {
   ): Promise<any> {
     return this.internalService.shipmentsListService(
       status_id,
+      offset,
+      search,
+      limit,
+      order,
+      response,
+    );
+  }
+
+  /**
+   * API View Shipment
+   * @param id
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API View Shipment',
+  })
+  @ApiBadRequestResponse({
+    description: '<b>Bad Request:</b><br/>' + '1.- Shipment ID was not found',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '<b>Error Message:</b> Error in service View Shipment',
+  })
+  @ApiOkResponse({
+    description: 'View Shipment successfully',
+    type: ResponseViewShipmentDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('shipments/:id')
+  async viewShipment(
+    @Param('id') id: number,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    return this.internalService.viewShipmentService(id, response);
+  }
+
+  /**
+   * API Shipment Tracking History
+   * @param shipment_id
+   * @param offset
+   * @param search
+   * @param limit
+   * @param order
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API Shipment Tracking History',
+  })
+  @ApiInternalServerErrorResponse({
+    description:
+      '<b>Error Message:</b> Error in service Shipment Tracking History',
+  })
+  @ApiOkResponse({
+    description: 'Shipment Tracking History successfully',
+    type: ResponseShipmentsListDto,
+  })
+  @ApiQuery({ name: 'offset', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'order', required: false, type: String })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('shipment-tracking-history/:shipment_id')
+  @UsePipes(ValidationPipe)
+  async shipmentTrackingHistory(
+    @Param('shipment_id') shipment_id: number,
+    @Query('offset') offset: string,
+    @Query('search') search: string,
+    @Query('limit') limit: string,
+    @Query('order') order: string,
+    @Res() response: express.Response,
+  ): Promise<any> {
+    return this.internalService.shipmentTrackingHistoryService(
+      shipment_id,
       offset,
       search,
       limit,
