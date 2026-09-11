@@ -760,4 +760,37 @@ export class InternalService {
       });
     }
   }
+
+  /**
+   * Function get Profile List
+   * @param response
+   */
+  async getProfileListService(@Res() response: express.Response) {
+    try {
+      const json_internal_user_profile =
+        await this.internalUserProfileRepository.find({
+          where: {
+            active: 1,
+          },
+        });
+
+      response.status(HttpStatus.OK).json({
+        statusCode: 200,
+        message: 'Get Profile List successfully',
+        system_message: [],
+        data: [json_internal_user_profile],
+      });
+    } catch (err) {
+      console.error(err);
+
+      const error_message =
+        err instanceof Error ? err.message : 'Unexpected error';
+
+      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: 500,
+        message: 'Error in service Get Profile List',
+        errors: [error_message],
+      });
+    }
+  }
 }

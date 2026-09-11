@@ -34,6 +34,7 @@ import { ResponseShipmentsListDto } from '../dto/response/response-shipments-lis
 import { ResponseViewShipmentDto } from '../dto/response/response-view-shipment.dto';
 import { RequestUpdateShipmentStatusDto } from '../dto/request/request-update-shipment-status.dto';
 import { ResponseShipmentTrackingHistoryDto } from '../dto/response/response-shipment-tracking-history.dto';
+import { InternalUserProfileEntity } from '../entities/internal-user-profile.entity';
 
 @ApiTags('internal')
 @ApiBearerAuth()
@@ -315,5 +316,26 @@ export class InternalController {
     @Res() response: express.Response,
   ): Promise<any> {
     return this.internalService.cancelShipmentService(auth, id, response);
+  }
+
+  /**
+   * API get Profile List
+   * @param response
+   */
+  @ApiOperation({
+    summary: 'API get Profile List',
+  })
+  @ApiInternalServerErrorResponse({
+    description: '<b>Error Message:</b> Error in service Get Profile List',
+  })
+  @ApiOkResponse({
+    description: 'Get Profile List successfully',
+    type: InternalUserProfileEntity,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('value')
+  async getValueCatalog(@Res() response: express.Response): Promise<any> {
+    return this.internalService.getProfileListService(response);
   }
 }

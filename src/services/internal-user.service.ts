@@ -20,7 +20,7 @@ export class InternalUserService {
   ) {}
 
   /**
-   * Function to validate user in database API TeleSalud24
+   * Function to validate user in database
    * @param user
    */
   private async userValidateService(
@@ -40,7 +40,7 @@ export class InternalUserService {
   }
 
   /**
-   * Function to auth API TeleSalud24
+   * Function to auth API
    * @param user
    */
   public async loginService(user: RequestUserLoginDto) {
@@ -50,7 +50,7 @@ export class InternalUserService {
           statusCode: 400,
           message: 'Bad Request',
           errors: [
-            'Email y/o password incorrecto(s).<br/>Por favor verifica e intenta nuevamente.',
+            'Email y/o password incorrecto(s). Por favor verifica e intenta nuevamente.',
           ],
         };
       }
@@ -60,7 +60,7 @@ export class InternalUserService {
           statusCode: 400,
           message: 'Bad Request',
           errors: [
-            'Email inactivo.<br/>Por favor, contacta al administrador del Sistema.',
+            'Email inactivo. Por favor, contacta al administrador del Sistema.',
           ],
         };
       }
