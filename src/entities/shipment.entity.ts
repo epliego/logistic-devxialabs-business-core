@@ -88,6 +88,6 @@ export class ShipmentEntity {
   update_date: Date;
 
   @OneToOne(() => InternalUserEntity)
-  @JoinColumn({ name: 'insert_by_internal', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'update_by_internal', referencedColumnName: 'id' })
   update_by_internal: Promise<InternalUserEntity>;
 }

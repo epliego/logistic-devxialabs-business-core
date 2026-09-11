@@ -2,7 +2,6 @@ import { HttpStatus, Injectable, Res } from '@nestjs/common';
 import { Repository, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import express from 'express';
-import { DateTime } from 'luxon'; // Consultado (10-2022) en: https://moment.github.io/luxon/
 import { ShipmentEntity } from '../entities/shipment.entity';
 import { RequestShipmentsAssignVehiclesDto } from '../dto/request/request-shipments-assign-vehicles.dto';
 

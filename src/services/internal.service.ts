@@ -155,7 +155,7 @@ export class InternalService {
       const json_internal_user_profile_supervisor =
         await this.internalUserProfileRepository.findOne({
           where: {
-            name: 'Supervisor',
+            name: 'Operador',
           },
           select: { name: true },
         });
@@ -543,7 +543,7 @@ export class InternalService {
           await shipment_tracking_history.insert_by_internal;
 
         array_shipment_tracking_history.push({
-          shipment_id: shipment.id,
+          shipment_tracking_history_id: shipment_tracking_history.id,
           guide_code: shipment.guide_code,
           provenance_direction: shipment.provenance_direction,
           destination_direction: shipment.destination_direction,
