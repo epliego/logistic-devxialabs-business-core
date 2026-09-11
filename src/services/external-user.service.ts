@@ -95,7 +95,7 @@ export class ExternalUserService {
           await shipment_tracking_history.insert_by_internal;
 
         array_shipment_tracking_history.push({
-          shipment_id: shipment.id,
+          shipment_tracking_history_id: shipment_tracking_history.id,
           guide_code: shipment.guide_code,
           provenance_direction: shipment.provenance_direction,
           destination_direction: shipment.destination_direction,

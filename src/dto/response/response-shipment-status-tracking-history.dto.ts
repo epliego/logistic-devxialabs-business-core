@@ -13,7 +13,7 @@ export class ResponseShipmentStatusTrackingHistoryDto {
     isArray: true,
     example: [
       {
-        shipment_id: 0,
+        shipment_tracking_history_id: 0,
         guide_code: 'string',
         provenance_direction: 'string',
         destination_direction: 'string',
