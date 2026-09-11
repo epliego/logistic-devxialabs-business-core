@@ -118,7 +118,9 @@ export class InternalService {
         response.status(HttpStatus.CREATED).json({
           statusCode: 201,
           message: 'Create Internal User successfully',
-          system_message: ['Usuario fue creado en el Sistema'],
+          system_message: [
+            'Usuario ' + new_internal_user.name + ' fue creado en el Sistema',
+          ],
           data: [],
         });
       }

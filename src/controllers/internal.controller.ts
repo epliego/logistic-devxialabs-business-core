@@ -334,7 +334,7 @@ export class InternalController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('value')
+  @Get('user-profile')
   async getValueCatalog(@Res() response: express.Response): Promise<any> {
     return this.internalService.getProfileListService(response);
   }
