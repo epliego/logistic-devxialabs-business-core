@@ -1,9 +1,16 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "../",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testRegex": "test/.*\\.e2e-spec\\.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "testTimeout": 5000,
+  "moduleNameMapper": {
+    "^@css-inline/css-inline$": "<rootDir>/test/__mocks__/css-inline.js"
+  },
+  "collectCoverage": true,
+  "collectCoverageFrom": ["src/**/*.(t|j)s", "!src/main.(t|j)s"],
+  "coverageDirectory": "test/coverage-e2e"
 }
