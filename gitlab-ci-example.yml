@@ -1,0 +1,84 @@
+image: debian:latest
+stages:
+  - deploy
+  - optional
+
+# scripts global -- hosting TELESALUD24
+before_script:
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY_HOSTING_TELESALUD24")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+# Ambiente Producción
+# Despliegue en Producción
+deploy_master:
+  stage: deploy
+  environment:
+    name: prod
+    url: https://app.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core/ && git checkout main && git fetch origin main && git pull origin main && export PATH=$PATH:/home/telesalud/.nvm/versions/node/v24.14.1/bin && npm run test:e2e && npm run build && ln -s /home/telesalud/nest-projects/ts24-business-core/src/i18n/ dist/src/i18n && ln -s /home/telesalud/nest-projects/ts24-business-core/files/ dist/files && pm2 stop ecosystem.config.js && pm2 status && pm2 start ecosystem.config.js --env production && pm2 status"
+  only:
+    - main
+
+# Npm install Producción
+npm_install_prod:
+  stage: optional
+  environment:
+    name: prod
+    url: https://app.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core/ && git checkout main && export PATH=$PATH:/home/telesalud/.nvm/versions/node/v24.14.1/bin && npm install"
+  when: manual
+  only:
+    - main
+
+# Npm update Producción
+npm_update_prod:
+  stage: optional
+  environment:
+    name: prod
+    url: https://app.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core/ && git checkout main && export PATH=$PATH:/home/telesalud/.nvm/versions/node/v24.14.1/bin && npm update"
+  when: manual
+  only:
+    - main
+
+# Ambiente QA
+# Despliegue en QA
+deploy_qa:
+  stage: deploy
+  environment:
+    name: qa
+    url: https://app-test.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core-test/ && git checkout qa && git fetch origin qa && git pull origin qa && export PATH=$PATH:/home/telesalud/.nvm/versions/node/v24.14.1/bin && pm2 stop ecosystem.config.js && pm2 status && pm2 start ecosystem.config.js && pm2 status"
+  only:
+    - qa
+
+# Npm install QA
+npm_install_qa:
+  stage: optional
+  environment:
+    name: qa
+    url: https://app-test.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core-test/ && git checkout qa && export PATH=$PATH:/home/telesalud/.nvm/versions/node/v24.14.1/bin && npm install"
+  when: manual
+  only:
+    - qa
+
+# Npm update QA
+npm_update_qa:
+  stage: optional
+  environment:
+    name: qa
+    url: https://app-test.telesalud24.com/
+  script:
+    - ssh telesalud@72.167.52.108 "cd /home/telesalud/nest-projects/ts24-business-core-test/ && git checkout qa && export PATH=$PATH:/home/sarkos/.nvm/versions/node/v24.14.1/bin && npm update"
+  when: manual
+  only:
+    - qa
