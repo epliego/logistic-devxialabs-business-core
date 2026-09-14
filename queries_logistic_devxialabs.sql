@@ -274,9 +274,10 @@ CREATE INDEX idx_shipment__tracking_history_status_insert_by_internal ON public.
 CREATE INDEX idx_shipment__tracking_history_status_update_by_internal ON public.shipment(update_by_internal);
 
 --------------------------------------------------------------------------------------------------
-INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'REGISTRADO');
+INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'CREADO');
 INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'EN ALMACÉN');
 INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'EN TRÁNSITO');
+INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'EN REPARTO');
 INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'DEVUELTO');
 INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'ENTREGADO');
 INSERT INTO values_catalog(category,name) VALUES ('SHIPMENT STATUS', 'CANCELADO');
